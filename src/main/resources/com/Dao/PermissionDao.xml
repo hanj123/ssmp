@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.Dao.PermissionDao">
+
+    <!--<resultMap id="PermissionMap_1" type="com.Domain.Permission">-->
+        <!--<id property="id" column="id"/>-->
+        <!--<result property="permissionName" column="permissionName"/>-->
+        <!--<result property="url" column="url"/>-->
+    <!--</resultMap>-->
+
+    <resultMap id="PermissionMap" type="com.Domain.Permission">
+        <id property="id" column="id"/>
+        <result property="permissionName" column="permissionName"/>
+        <result property="url" column="url"/>
+        <collection property="roles" column="id" select="com.Dao.RoleDao.findByPermissionId"></collection>
+    </resultMap>
+
+    <select id="findByRoleId" resultMap="PermissionMap" parameterType="int">
+        select * from permission where id in (select permissionId from role_permission where roleId=#{roleId})
+    </select>
+
+    <select id="findAll" resultMap="PermissionMap">
+        select * from permission
+    </select>
+
+    <insert id="savePermission" parameterType="com.Domain.Permission">
+        insert into permission(permissionName,url) values(#{permissionName},#{url})
+    </insert>
+</mapper>

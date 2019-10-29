@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.Dao.UserDao">
+
+    <!--<resultMap id="UserMap_1" type="com.Domain.UserInfo">-->
+        <!--<id property="id" column="id"/>-->
+        <!--<result column="email" property="email"/>-->
+        <!--<result property="username" column="username"/>-->
+        <!--<result column="password" property="password"/>-->
+        <!--<result column="phoneNum" property="phoneNum"/>-->
+        <!--<result column="status" property="status"/>-->
+    <!--</resultMap>-->
+
+    <!--定义结果封装的映射关系，用户类型-->
+    <resultMap id="UserMap" type="com.Domain.UserInfo">
+        <id property="id" column="id"/>
+        <result column="email" property="email"/>
+        <result property="username" column="username"/>
+        <result column="password" property="password"/>
+        <result column="phoneNum" property="phoneNum"/>
+        <result column="status" property="status"/>
+        <!--到这里，因为一个用户涉及多个角色，我需要去调用根据用户ID寻找角色集合的语句，结果如何封装交给它-->
+        <collection property="roles" column="id" select="com.Dao.RoleDao.findRolesByUserId"></collection>
+    </resultMap>
+
+
+    <!-- 配置查询所有操作 -->
+    <select id="findAll" resultMap="UserMap">
+        select * from users
+    </select>
+
+    <!--插入操作-->
+    <insert id="addUser" parameterType="com.Domain.UserInfo">
+        insert into users(email,username,password,phoneNum,status)
+    values(#{email},#{username},#{password},#{phoneNum},#{status})
+    </insert>
+
+    <!--根据用户ID来查询用户-->
+    <select id="findById" parameterType="int" resultMap="UserMap">
+        select * from users where id = #{id}
+    </select>
+
+    <!--根据角色ID来查询所有的用户-->
+    <select id="findByRoleId" parameterType="int" resultMap="UserMap">
+        select * from users where id in (select userId from users_role where roleId = #{roleId})
+    </select>
+
+    <select id="findByUserName" parameterType="String" resultMap="UserMap">
+        select * from users where username = #{userName};
+    </select>
+
+    <insert id="addRolesToUser">
+        insert into users_role(userId,roleId) values(#{userId},#{roleId})
+    </insert>
+
+    <update id="UpdateNewPwdByName">
+        update users set password=#{newpassword} where username=#{username}
+    </update>
+</mapper>

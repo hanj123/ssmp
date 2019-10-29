@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.Dao.RoleDao">
+
+    <!--<resultMap id="RoleMap_1" type="com.Domain.Role">-->
+        <!--<id property="id" column="id"/>-->
+        <!--<result property="roleName" column="roleName"/>-->
+        <!--<result property="roleDesc" column="roleDesc"/>-->
+    <!--</resultMap>-->
+
+    <resultMap id="RoleMap" type="com.Domain.Role">
+        <id property="id" column="id"/>
+        <result property="roleName" column="roleName"/>
+        <result property="roleDesc" column="roleDesc"/>
+        <collection property="permissions" column="id" select="com.Dao.PermissionDao.findByRoleId"></collection>
+        <collection property="userInfos" column="id" select="com.Dao.UserDao.findByRoleId"></collection>
+    </resultMap>
+
+
+    <select id="findAll" resultMap="RoleMap">
+        select * from role;
+    </select>
+
+    <select id="findRolesByUserId" resultMap="RoleMap" parameterType="String">
+        select * from role where id in (select roleId from users_role where userId = #{userId});
+    </select>
+
+    <select id="findByPermissionId" resultMap="RoleMap" parameterType="int">
+        select * from role where id in (select roleId from role_permission where permissionId=#{permissionId})
+    </select>
+
+    <insert id="addRole" parameterType="com.Domain.Role">
+        insert into role(id,roleName,roleDesc) values(#{id},#{roleName},#{roleDesc})
+    </insert>
+
+    <select id="findOtherRoles" resultMap="RoleMap">
+        select * from role where id not in (select roleId from users_role where userId = #{userId})
+    </select>
+
+</mapper>
